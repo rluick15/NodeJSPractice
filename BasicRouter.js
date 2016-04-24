@@ -1,6 +1,7 @@
 'use strict';
 const http = require('http');
 const url = require('url');
+const qs = require('querystring');
 
 let routes = {
 	'GET': {
@@ -18,7 +19,23 @@ let routes = {
 		}
 	}, 
 	'POST': {
-
+		'/api/login': (req, res) => {
+			let body = '';
+			req.on('data', data => {
+				body += data;
+				if(body.length > 2097152) {
+					res.writeHead(413, {'Content-type': 'text/html'});
+					res.end('<h3>Error: File is too big</h3>');
+					res.connection.destroy();
+				}
+			});
+			req.on('end', () => {
+				let params = qs.parse(body);
+				console.log('Username: ', params['username']);
+				console.log('Password: ', params['password']);
+				res.end();
+			});
+		}
 	},
 	'NA': (req, res) => {
 		res.writeHead(404);
